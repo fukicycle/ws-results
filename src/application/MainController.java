@@ -1,6 +1,5 @@
 package application;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -12,6 +11,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -19,7 +19,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Callback;
 
-public class MainController extends WindowBase{
+public class MainController extends WindowBase {
+	private ObservableList<ResultView> resultViews = FXCollections.observableArrayList();
 
 	@FXML
 	private ResourceBundle resources;
@@ -58,6 +59,12 @@ public class MainController extends WindowBase{
 	private Label statusLabel;
 
 	@FXML
+	private Button nextButton;
+
+	@FXML
+	private Button prevButton;
+
+	@FXML
 	void initialize() {
 		assert competitionColumn != null : "fx:id=\"competitionColumn\" was not injected: check your FXML file 'Main.fxml'.";
 		assert competitorColumn != null : "fx:id=\"competitorColumn\" was not injected: check your FXML file 'Main.fxml'.";
@@ -67,15 +74,48 @@ public class MainController extends WindowBase{
 		assert resultColumn != null : "fx:id=\"resultColumn\" was not injected: check your FXML file 'Main.fxml'.";
 		assert skillColumn != null : "fx:id=\"skillColumn\" was not injected: check your FXML file 'Main.fxml'.";
 		assert tableView1 != null : "fx:id=\"tableView1\" was not injected: check your FXML file 'Main.fxml'.";
-		ObservableList<ResultView> resultViews = FXCollections.observableArrayList();
+		rankColumn.setCellValueFactory(new PropertyValueFactory<ResultView, Integer>("rank"));
+		medalColumn.setCellValueFactory(new PropertyValueFactory<ResultView, String>("medal"));
+		competitorColumn
+				.setCellValueFactory(new PropertyValueFactory<ResultView, String>("competitor"));
+		resultColumn.setCellValueFactory(new PropertyValueFactory<ResultView, Double>("result"));
+		competitionColumn
+				.setCellValueFactory(new PropertyValueFactory<ResultView, String>("competition"));
+		memberColumn.setCellValueFactory(new PropertyValueFactory<ResultView, String>("member"));
+		skillColumn.setCellValueFactory(new PropertyValueFactory<ResultView, String>("skill"));
+		iconColumn.setCellFactory(
+				new Callback<TableColumn<ResultView, String>, TableCell<ResultView, String>>() {
+					@Override
+					public TableCell<ResultView, String> call(TableColumn<ResultView, String> param) {
+						return new ImageTableCell();
+					}
+				});
+		iconColumn.setCellValueFactory(new PropertyValueFactory<ResultView, String>("image"));
+		move(true);
+		nextButton.setOnAction(e -> move(true));
+		prevButton.setOnAction(e -> move(false));
+
+	}
+
+	private int offset = -30;
+	private void move(boolean isNext) {
+		resultViews.clear();
 		statusLabel.setText("Loading ...");
+		if (isNext) {
+			offset = offset + 30;
+			if (offset > 10431)
+				offset = offset - 30;
+		} else {
+			offset = offset - 30;
+			if (offset < 0)
+				offset = 0;
+		}
 		// separate non-FX thread
 		new Thread() {
-
 			// runnable for that thread
 			public void run() {
 				try {
-					WSResult wsResult = Api.getResults();
+					WSResult wsResult = Api.getResults(offset, 30);
 					int rank = 1;
 					String skill = "";
 					for (Result result : wsResult.results) {
@@ -99,37 +139,17 @@ public class MainController extends WindowBase{
 								result.getMember().getName().getText(), skill, url));
 						rank++;
 					}
-
-				} catch (IOException ex) {
+				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
 				// update ProgressIndicator on FX thread
 				Platform.runLater(new Runnable() {
 					public void run() {
-						rankColumn.setCellValueFactory(new PropertyValueFactory<ResultView, Integer>("rank"));
-						medalColumn.setCellValueFactory(new PropertyValueFactory<ResultView, String>("medal"));
-						competitorColumn
-								.setCellValueFactory(new PropertyValueFactory<ResultView, String>("competitor"));
-						resultColumn.setCellValueFactory(new PropertyValueFactory<ResultView, Double>("result"));
-						competitionColumn
-								.setCellValueFactory(new PropertyValueFactory<ResultView, String>("competition"));
-						memberColumn.setCellValueFactory(new PropertyValueFactory<ResultView, String>("member"));
-						skillColumn.setCellValueFactory(new PropertyValueFactory<ResultView, String>("skill"));
-						iconColumn.setCellFactory(
-								new Callback<TableColumn<ResultView, String>, TableCell<ResultView, String>>() {
-									@Override
-									public TableCell<ResultView, String> call(TableColumn<ResultView, String> param) {
-										return new ImageTableCell();
-									}
-								});
-
-						iconColumn.setCellValueFactory(new PropertyValueFactory<ResultView, String>("image"));
 						tableView1.itemsProperty().setValue(resultViews);
 						statusLabel.setText("Count:" + resultViews.size());
 					}
 				});
 			}
 		}.start();
-
 	}
 }

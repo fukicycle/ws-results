@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.MainController">
    <center>
@@ -32,10 +34,19 @@
       <HBox prefHeight="50.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
    </top>
    <bottom>
-      <Label fx:id="statusLabel" text="Label" BorderPane.alignment="CENTER_LEFT">
+      <VBox prefWidth="100.0" BorderPane.alignment="CENTER">
+         <children>
+            <HBox alignment="CENTER" prefWidth="200.0" spacing="10.0">
+               <children>
+                  <Button fx:id="prevButton" mnemonicParsing="false" prefWidth="150.0" text="Prev" />
+                  <Button fx:id="nextButton" mnemonicParsing="false" prefWidth="150.0" text="Next" />
+               </children>
+            </HBox>
+            <Label fx:id="statusLabel" text="Label" />
+         </children>
          <BorderPane.margin>
             <Insets top="10.0" />
          </BorderPane.margin>
-      </Label>
+      </VBox>
    </bottom>
 </BorderPane>
