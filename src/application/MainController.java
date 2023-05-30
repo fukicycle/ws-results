@@ -96,17 +96,18 @@ public class MainController extends WindowBase {
 		prevButton.setOnAction(e -> move(false));
 
 	}
-
-	private int offset = -30;
+	private int tableViewCount = 50;
+	private int lastRank = 0;
+	private int offset = -tableViewCount;
 	private void move(boolean isNext) {
 		resultViews.clear();
 		statusLabel.setText("Loading ...");
 		if (isNext) {
-			offset = offset + 30;
+			offset = offset + tableViewCount;
 			if (offset > 10431)
-				offset = offset - 30;
+				offset = offset - tableViewCount;
 		} else {
-			offset = offset - 30;
+			offset = offset - tableViewCount;
 			if (offset < 0)
 				offset = 0;
 		}
@@ -115,19 +116,19 @@ public class MainController extends WindowBase {
 			// runnable for that thread
 			public void run() {
 				try {
-					WSResult wsResult = Api.getResults(offset, 30);
-					int rank = 1;
+					WSResult wsResult = Api.getResults(offset, tableViewCount);
+					int rank = lastRank + 1;
 					String skill = "";
 					for (Result result : wsResult.results) {
-						String tmp = result.getSkill().getName().getText();
-						if (!skill.equals(tmp)) {
-							skill = tmp;
-							rank = 1;
-						}
 						String medalCode = "";
 						Medal medal = result.getMedal();
 						if (medal != null)
 							medalCode = medal.getCode();
+						String tmp = result.getSkill().getName().getText();
+						if (!skill.equals(tmp) && medalCode.equals("GOLD")) {
+							skill = tmp;
+							rank = 1;
+						}
 						String url = "";
 						application.Entities.Image image = result.getCompetitors().get(0).getImage();
 						if (image != null)
@@ -147,6 +148,7 @@ public class MainController extends WindowBase {
 					public void run() {
 						tableView1.itemsProperty().setValue(resultViews);
 						statusLabel.setText("Count:" + resultViews.size());
+						lastRank = resultViews.get(resultViews.size() - 1).getRank();
 					}
 				});
 			}

@@ -27,6 +27,13 @@ public class ImageTableCell extends TableCell<ResultView, String> {
 							setGraphic(imageView);
 						}
 					});
+				}else {
+					Platform.runLater(new Runnable() {
+						@Override
+						public void run() {
+							setGraphic(imageView);
+						}
+					});
 				}
 			}
 		}.start();
