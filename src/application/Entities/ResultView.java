@@ -8,9 +8,10 @@ public class ResultView {
 	public String competition;
 	public String member;
 	public String skill;
+	public String image;
 
 	public ResultView(int rank, String medal, String competitor, Double result, String competition, String member,
-			String skill) {
+			String skill, String image) {
 		super();
 		this.rank = rank;
 		this.medal = medal;
@@ -19,6 +20,15 @@ public class ResultView {
 		this.competition = competition;
 		this.member = member;
 		this.skill = skill;
+		this.image = image;
+	}
+
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
 	}
 
 	public int getRank() {

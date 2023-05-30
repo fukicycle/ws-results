@@ -13,17 +13,22 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.util.Callback;
 
-public class MainController extends WindowBase {
+public class MainController extends WindowBase{
 
 	@FXML
 	private ResourceBundle resources;
 
 	@FXML
 	private URL location;
+
+	@FXML
+	private TableColumn<ResultView, String> iconColumn;
 
 	@FXML
 	private TableColumn<ResultView, String> competitionColumn;
@@ -75,7 +80,7 @@ public class MainController extends WindowBase {
 					String skill = "";
 					for (Result result : wsResult.results) {
 						String tmp = result.getSkill().getName().getText();
-						if(! skill.equals(tmp)) {
+						if (!skill.equals(tmp)) {
 							skill = tmp;
 							rank = 1;
 						}
@@ -83,11 +88,15 @@ public class MainController extends WindowBase {
 						Medal medal = result.getMedal();
 						if (medal != null)
 							medalCode = medal.getCode();
+						String url = "";
+						application.Entities.Image image = result.getCompetitors().get(0).getImage();
+						if (image != null)
+							url = image.getThumbnail();
 						resultViews.add(new ResultView(rank, medalCode,
 								result.getCompetitors().get(0).getFirst_name() + " "
 										+ result.getCompetitors().get(0).getLast_name(),
 								result.getMark(), result.getSkill().getEvent().getName(),
-								result.getMember().getName().getText(), skill));
+								result.getMember().getName().getText(), skill, url));
 						rank++;
 					}
 
@@ -96,7 +105,6 @@ public class MainController extends WindowBase {
 				}
 				// update ProgressIndicator on FX thread
 				Platform.runLater(new Runnable() {
-
 					public void run() {
 						rankColumn.setCellValueFactory(new PropertyValueFactory<ResultView, Integer>("rank"));
 						medalColumn.setCellValueFactory(new PropertyValueFactory<ResultView, String>("medal"));
@@ -107,6 +115,15 @@ public class MainController extends WindowBase {
 								.setCellValueFactory(new PropertyValueFactory<ResultView, String>("competition"));
 						memberColumn.setCellValueFactory(new PropertyValueFactory<ResultView, String>("member"));
 						skillColumn.setCellValueFactory(new PropertyValueFactory<ResultView, String>("skill"));
+						iconColumn.setCellFactory(
+								new Callback<TableColumn<ResultView, String>, TableCell<ResultView, String>>() {
+									@Override
+									public TableCell<ResultView, String> call(TableColumn<ResultView, String> param) {
+										return new ImageTableCell();
+									}
+								});
+
+						iconColumn.setCellValueFactory(new PropertyValueFactory<ResultView, String>("image"));
 						tableView1.itemsProperty().setValue(resultViews);
 						statusLabel.setText("Count:" + resultViews.size());
 					}
@@ -115,5 +132,4 @@ public class MainController extends WindowBase {
 		}.start();
 
 	}
-
 }

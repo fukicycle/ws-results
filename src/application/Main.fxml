@@ -13,6 +13,7 @@
         <columns>
           <TableColumn fx:id="rankColumn" editable="false" prefWidth="75.0" sortable="false" text="Rank" />
           <TableColumn fx:id="medalColumn" editable="false" prefWidth="75.0" sortable="false" text="Medal" />
+            <TableColumn fx:id="iconColumn" editable="false" prefWidth="75.0" sortable="false" text="Icon" />
             <TableColumn fx:id="competitorColumn" editable="false" prefWidth="75.0" sortable="false" text="Competitor" />
             <TableColumn fx:id="resultColumn" editable="false" prefWidth="75.0" sortable="false" text="Result" />
             <TableColumn fx:id="competitionColumn" editable="false" prefWidth="75.0" sortable="false" text="Competition" />
