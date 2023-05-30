@@ -71,16 +71,24 @@ public class MainController extends WindowBase {
 			public void run() {
 				try {
 					WSResult wsResult = Api.getResults();
+					int rank = 1;
+					String skill = "";
 					for (Result result : wsResult.results) {
+						String tmp = result.getSkill().getName().getText();
+						if(! skill.equals(tmp)) {
+							skill = tmp;
+							rank = 1;
+						}
 						String medalCode = "";
 						Medal medal = result.getMedal();
 						if (medal != null)
 							medalCode = medal.getCode();
-						resultViews.add(new ResultView(0, medalCode,
+						resultViews.add(new ResultView(rank, medalCode,
 								result.getCompetitors().get(0).getFirst_name() + " "
 										+ result.getCompetitors().get(0).getLast_name(),
 								result.getMark(), result.getSkill().getEvent().getName(),
-								result.getMember().getName().getText(), result.getSkill().getName().getText()));
+								result.getMember().getName().getText(), skill));
+						rank++;
 					}
 
 				} catch (IOException ex) {
