@@ -12,6 +12,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -49,6 +50,9 @@ public class MainController extends WindowBase {
 	private TableView<ResultView> tableView1;
 
 	@FXML
+	private Label statusLabel;
+
+	@FXML
 	void initialize() {
 		assert competitionColumn != null : "fx:id=\"competitionColumn\" was not injected: check your FXML file 'Main.fxml'.";
 		assert competitorColumn != null : "fx:id=\"competitorColumn\" was not injected: check your FXML file 'Main.fxml'.";
@@ -59,46 +63,46 @@ public class MainController extends WindowBase {
 		assert skillColumn != null : "fx:id=\"skillColumn\" was not injected: check your FXML file 'Main.fxml'.";
 		assert tableView1 != null : "fx:id=\"tableView1\" was not injected: check your FXML file 'Main.fxml'.";
 		ObservableList<ResultView> resultViews = FXCollections.observableArrayList();
+		statusLabel.setText("Loading ...");
 		// separate non-FX thread
 		new Thread() {
 
 			// runnable for that thread
 			public void run() {
-				for (int i = 0; i < 20; i++) {
-					try {
-						WSResult wsResult = Api.getResults();
-						for (Result result : wsResult.results) {
-							String medalCode = "";
-							Medal medal = result.getMedal();
-							if (medal != null)
-								medalCode = medal.getCode();
-							resultViews.add(new ResultView(0, medalCode,
-									result.getCompetitors().get(0).getFirst_name() + " "
-											+ result.getCompetitors().get(0).getLast_name(),
-									result.getMark(), result.getSkill().getEvent().getName(),
-									result.getMember().getName().getText(), result.getSkill().getName().getText()));
-						}
-
-					} catch (IOException ex) {
-						ex.printStackTrace();
+				try {
+					WSResult wsResult = Api.getResults();
+					for (Result result : wsResult.results) {
+						String medalCode = "";
+						Medal medal = result.getMedal();
+						if (medal != null)
+							medalCode = medal.getCode();
+						resultViews.add(new ResultView(0, medalCode,
+								result.getCompetitors().get(0).getFirst_name() + " "
+										+ result.getCompetitors().get(0).getLast_name(),
+								result.getMark(), result.getSkill().getEvent().getName(),
+								result.getMember().getName().getText(), result.getSkill().getName().getText()));
 					}
-					// update ProgressIndicator on FX thread
-					Platform.runLater(new Runnable() {
 
-						public void run() {
-							rankColumn.setCellValueFactory(new PropertyValueFactory<ResultView, Integer>("rank"));
-							medalColumn.setCellValueFactory(new PropertyValueFactory<ResultView, String>("medal"));
-							competitorColumn
-									.setCellValueFactory(new PropertyValueFactory<ResultView, String>("competitor"));
-							resultColumn.setCellValueFactory(new PropertyValueFactory<ResultView, Double>("result"));
-							competitionColumn
-									.setCellValueFactory(new PropertyValueFactory<ResultView, String>("competition"));
-							memberColumn.setCellValueFactory(new PropertyValueFactory<ResultView, String>("member"));
-							skillColumn.setCellValueFactory(new PropertyValueFactory<ResultView, String>("skill"));
-							tableView1.itemsProperty().setValue(resultViews);
-						}
-					});
+				} catch (IOException ex) {
+					ex.printStackTrace();
 				}
+				// update ProgressIndicator on FX thread
+				Platform.runLater(new Runnable() {
+
+					public void run() {
+						rankColumn.setCellValueFactory(new PropertyValueFactory<ResultView, Integer>("rank"));
+						medalColumn.setCellValueFactory(new PropertyValueFactory<ResultView, String>("medal"));
+						competitorColumn
+								.setCellValueFactory(new PropertyValueFactory<ResultView, String>("competitor"));
+						resultColumn.setCellValueFactory(new PropertyValueFactory<ResultView, Double>("result"));
+						competitionColumn
+								.setCellValueFactory(new PropertyValueFactory<ResultView, String>("competition"));
+						memberColumn.setCellValueFactory(new PropertyValueFactory<ResultView, String>("member"));
+						skillColumn.setCellValueFactory(new PropertyValueFactory<ResultView, String>("skill"));
+						tableView1.itemsProperty().setValue(resultViews);
+						statusLabel.setText("Count:" + resultViews.size());
+					}
+				});
 			}
 		}.start();
 
